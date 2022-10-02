@@ -181,6 +181,32 @@ fun hpqr : (p → q ∨ r) => Or.elim (em q)
             (fun hq : q => show r from False.elim (hqf hq))
             (fun hr : r => hr))
 
+example : ¬(p ∧ q) → ¬p ∨ ¬q :=
+fun h1 : (p ∧ q) → False => Or.elim (em p)
+  (fun hp : p => suffices hqf : q → False from Or.intro_right (¬p) hqf
+    fun hq : q => show False from h1 (And.intro hp hq))
+  (fun hpf : p → False => Or.intro_left (q → False) hpf)
+
+example : ¬(p → q) → p ∧ ¬q :=
+fun h1 : (p → q) → False =>
+  have h2 : p := Or.elim (em p)
+    (fun hp : p => hp)
+    (fun hpf : p → False =>
+      have hpq : p → q := fun hp : p => False.elim (hpf hp)
+      False.elim (h1 hpq))
+  have h3 : q → False := Or.elim (em q)
+    (fun hq : q =>
+      fun _ : q => h1 (fun _ : p => hq))
+    (fun hqf : q → False => hqf)
+  show p ∧ ¬q from And.intro h2 h3
+
+example : (p → q) → (¬p ∨ q) :=
+fun hpq : p → q => Or.elim (em p)
+  (fun hp : p =>
+    have hq : q := hpq hp
+    show ¬p ∨ q from  Or.intro_right (p → False) hq)
+  (fun hpf : p → False => show ¬p ∨ q from Or.intro_left q hpf)
+
 example : (¬q → ¬p) → (p → q) :=
 fun hqp : ¬q → ¬p => Or.elim (em q)
    (fun hq : q =>
@@ -190,3 +216,20 @@ fun hqp : ¬q → ¬p => Or.elim (em q)
       fun hp : p => show q from False.elim (hpf hp))
 
 example : p ∨ ¬p := em p
+
+example : ((p → q) → p) → p :=
+fun h1 : (p → q) → p => Or.elim (em (p → q))
+  (h1)
+  (fun _ : (p → q) → False => Or.elim (em p)
+    (fun hp : p => hp)
+    (fun hpf : p → False =>
+      have hpq : p → q := fun hp : p => show q from False.elim (hpf hp)
+      show p from (h1 hpq)))
+
+example : ¬(p ↔ ¬p) :=
+fun h1 : p ↔ ¬p =>
+  have hleft : p → ¬p := Iff.mp h1
+  have hright : ¬p → p := Iff.mpr h1
+  have hp : p := hright (fun h2 : p => (hleft h2) h2)
+  have hpf : ¬p := hleft hp
+  show False from (hpf hp)
