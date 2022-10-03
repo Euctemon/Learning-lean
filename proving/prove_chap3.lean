@@ -230,6 +230,6 @@ example : ¬(p ↔ ¬p) :=
 fun h1 : p ↔ ¬p =>
   have hleft : p → ¬p := Iff.mp h1
   have hright : ¬p → p := Iff.mpr h1
-  have hp : p := hright (fun h2 : p => (hleft h2) h2)
-  have hpf : ¬p := hleft hp
+  have hpf : ¬p := fun h2 : p => (hleft h2) h2
+  have hp : p := hright hpf
   show False from (hpf hp)
