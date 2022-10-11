@@ -123,8 +123,7 @@ example (a : α) : (∃ x, p x → r) ↔ (∀ x, p x) → r := Iff.intro
     show ∃ x, p x → r from (Exists.intro a h2))
   (fun h2 : ¬ r => show ∃ x, p x → r from byContradiction
     fun h3 : ¬ ∃ x, p x → r => h2
-      (show r from h1
-        (fun y : α => show p y from byContradiction
+      (show r from h1 (fun y : α => show p y from byContradiction
           fun hpf : ¬ p y => h3
             (have h4 : p y → r := fun hp : p y => False.elim (hpf hp)
             show (∃ x, p x → r) from (Exists.intro y h4))))))
