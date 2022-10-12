@@ -145,3 +145,57 @@ example (a : α) : (∃ x, r → p x) ↔ (r → ∃ x, p x) := Iff.intro
   (fun hrf : r → False =>
     have h2 : r → p a := fun hr : r => False.elim (hrf hr)
     Exists.intro a h2))
+
+example : (∀ x, p x ∧ q x) ↔ (∀ x, p x) ∧ (∀ x, q x) := Iff.intro
+(fun h1 : ∀ x, p x ∧ q x => And.intro
+  (fun y : α => (h1 y).left)
+  (fun y : α => (h1 y).right))
+(fun h1 : (∀ x, p x) ∧ (∀ x, q x) =>
+  fun y : α => And.intro (h1.left y) (h1.right y))
+
+example : (∀ x, p x → q x) → (∀ x, p x) → (∀ x, q x) :=
+fun h1 : ∀ x, p x → q x =>
+  fun h2 : ∀ x, p x =>
+    fun y : α => (h1 y) (h2 y)
+
+example : (∀ x, p x) ∨ (∀ x, q x) → ∀ x, p x ∨ q x :=
+fun h1 : (∀ x, p x) ∨ (∀ x, q x) =>
+  fun y : α => Or.elim h1
+    (fun h2 : ∀ x, p x => Or.intro_left (q y) (h2 y))
+    (fun h2 : ∀ x, q x => Or.intro_right (p y) (h2 y))
+
+example : α → ((∀ _ : α, r) ↔ r) :=
+fun a : α => Iff.intro
+  (fun h1 : (∀ _ : α, r) => h1 a)
+  (fun h1 : r =>
+    fun _ : α => h1)
+
+example : (∀ x, p x ∨ r) ↔ (∀ x, p x) ∨ r := Iff.intro
+(fun h1 : ∀ x, p x ∨ r => Or.elim (em r)
+  (fun hr : r => Or.intro_right (∀ x, p x) hr)
+  (fun hrf : ¬ r => suffices h2 : ∀ x, p x from Or.intro_left r h2
+    fun y : α =>
+      have h3 : p y ∨ r := h1 y
+      Or.elim h3
+      (fun hp : p y => hp)
+      (fun hr : r => show p y from False.elim (hrf hr))))
+(fun h1 : (∀ x, p x) ∨ r =>
+  fun y : α => Or.elim h1
+    (fun h2 : ∀ x, p x => Or.intro_left r (h2 y))
+    (fun hr : r => Or.intro_right (p y) hr))
+
+example : (∀ x, r → p x) ↔ (r → ∀ x, p x) := Iff.intro
+(fun h1 : ∀ x, r → p x =>
+  fun hr : r =>
+    fun y : α => (h1 y) hr)
+(fun h1 : r → ∀ x, p x =>
+  fun y : α =>
+    fun hr : r => (h1 hr) y)
+
+variable (men : Type) (barber : men)
+variable (shaves : men → men → Prop)
+
+example (h : ∀ x : men, shaves barber x ↔ ¬ shaves x x) : False :=
+have hb : shaves barber barber ↔ ¬ shaves barber barber := h barber
+have hf : ¬ shaves barber barber := fun ht : shaves barber barber => (hb.mp ht) ht
+show False from hf (hb.mpr hf)
