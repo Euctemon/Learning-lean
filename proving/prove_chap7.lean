@@ -46,3 +46,28 @@ calc length (append (cons head tail) bs) = length (cons head (append tail bs)) :
      _ = succ (length (append tail bs)) := rfl
      _ = succ (length tail + length bs) := by rw [ih]
      _ = succ (length tail) + length bs := by rw [Nat.succ_add])
+
+namespace Hidden
+
+theorem trans {α : Type u} {a b c : α} (h₁ : Eq a b) (h₂ : Eq b c) : Eq a c := by rw [h₁,h₂]
+
+theorem congr {α β : Type u} {a b : α} (f : α → β) (h : Eq a b) : Eq (f a) (f b) := by rw [h]
+
+def subtract (n m : Nat) : Nat :=
+match m with
+| zero => n
+| succ k => pred (subtract n k)
+
+theorem pred_sub_eq_sub_pred : pred (subtract n k) = subtract (pred n) k :=
+Nat.recOn (motive := fun x : Nat => pred (subtract n x) = subtract (pred n) x) k
+(show pred (subtract n zero) = subtract (pred n) zero from rfl)
+(fun (r : Nat) (ih : pred (subtract n r) = subtract (pred n) r) =>
+show pred (subtract n (succ r)) = subtract (pred n) (succ r) from
+by rw [subtract,ih,subtract])
+
+theorem left_sub_cancel : subtract (n+k) n = k :=
+Nat.recOn (motive := fun x : Nat => subtract (x+k) x = k) n
+(show subtract (zero + k) zero = k from by rw [Nat.zero_add k,subtract])
+(fun (r : Nat) (ih : subtract (r+k) r = k) =>
+show subtract ((succ r)+k) (succ r) = k from
+by rw [Nat.succ_add,subtract,pred_sub_eq_sub_pred, Nat.pred_succ,ih])
