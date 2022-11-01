@@ -36,7 +36,7 @@ cases h with
 -- proofs with the and connective
 
 example (p q : Prop) : p ∧ q → q ∧ p := by
-intro h  
+intro h
 apply And.intro
 exact h.right
 exact h.left
@@ -57,3 +57,6 @@ intro h
 cases h with
 | intro => apply And.intro
            repeat assumption
+
+example (p q : Prop) : p ∧ q → q ∧ p :=
+fun h => And.intro h.right h.left
