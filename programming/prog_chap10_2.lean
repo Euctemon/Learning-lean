@@ -1,3 +1,5 @@
+-- summing lists
+
 def NonTail.sum : List Nat → Nat
  | [] => 0
  | x :: xs => x + sum xs
@@ -23,7 +25,8 @@ simp [Tail.sum]
 rw [← Nat.zero_add (NonTail.sum xs)]
 exact Helper_sum_eq xs 0
 
---
+
+-- reversing lists
 
 def NonTail.reverse : List α → List α
  | [] => []
@@ -49,7 +52,8 @@ simp [Tail.reverse]
 rw [← List.append_nil (NonTail.reverse xs)]
 exact Helper_reverse_eq xs []
 
---
+
+-- factorial function
 
 def NonTail.fact : Nat → Nat
  | 0 => 1
@@ -75,3 +79,21 @@ funext a
 simp [Tail.fact]
 rw [← Nat.one_mul (NonTail.fact a)]
 exact Helper_fact_eq a 1
+
+
+-- reversing reversed list
+
+theorem append_singleton (as : List α) (a : α) : [a] ++ as = a::as := by simp
+
+namespace NonTail
+
+theorem Helper_double_Reverse (xs : List α) : ∀ (as : List α), reverse (reverse xs ++ as) = reverse as ++ xs := by
+induction xs with
+| nil => simp [reverse]
+| cons y ys h => intro ks
+                 rw [reverse, List.append_assoc]
+                 rw [h ([y]++ks), append_singleton, reverse, List.append_assoc, append_singleton]
+
+theorem Reverse_of_reverse (xs : List α) : reverse (reverse xs) = xs := by
+rw [← List.append_nil (reverse xs)]
+rw [Helper_double_Reverse xs [], reverse, List.nil_append]
