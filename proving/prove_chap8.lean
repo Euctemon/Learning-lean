@@ -37,7 +37,22 @@ def anotherExpr : Expr := times (plus (const 1) (const 2)) (plus (const 5) (var 
 
 #eval (fuse anotherExpr)
 
+theorem simpConst_eq (v : Nat → Nat) : ∀ e : Expr, eval v (simpConst e) = eval v e := by
+intro e
+cases e with
+| const a => rfl
+| var a => rfl
+| plus r s => cases r with
+  | const r => cases s <;> rw [simpConst]; rfl
+  | _ => rw [simpConst]
+| times r s => cases r with
+  | const r => cases s <;> rw [simpConst]; rfl
+  | _ => rw [simpConst]
 
-theorem simpConst_eq (v : Nat → Nat) : ∀ e : Expr, eval v (simpConst e) = eval v e := by sorry
-
-theorem fuse_eq (v : Nat → Nat) : ∀ e : Expr, eval v (fuse e) = eval v e := by sorry
+theorem fuse_eq (v : Nat → Nat) : ∀ e : Expr, eval v (fuse e) = eval v e := by
+intro e
+induction e with
+| const a => rfl
+| var a => rfl
+| plus a b ha hb => simp [fuse,simpConst_eq,eval,ha, hb]
+| times a b ha hb => simp [fuse,simpConst_eq,eval,ha, hb]
